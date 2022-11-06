@@ -10,7 +10,7 @@ int main(int argc, char* argv[]){
     }
 
 
-    // arse args
+    // parse args
     char* program = argv[1];
     char* args = argv[2];
 

@@ -6,7 +6,7 @@ int main(int argc, char* argv[]){
         printf("Usage: %s program.exe \"args and args \" outfile.txt\n", argv[0]);
         return 0;
     }
-    // arse args
+    //arse args
     char* program = argv[1];
     char* args = argv[2];
     char* outfile = argv[3];

@@ -3,6 +3,7 @@
         "*.ml": "ocaml",
         "*.mli": "ocaml",
         "*.module": "php",
-        "printfile.h": "c"
+        "printfile.h": "c",
+        "windows.h": "c"
     }
 }
