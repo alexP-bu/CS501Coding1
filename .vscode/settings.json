@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.ml": "ocaml",
+        "*.mli": "ocaml",
+        "*.module": "php",
+        "printfile.h": "c"
+    }
+}

@@ -29,49 +29,23 @@ BOOL PrintFileContents(char* filename){
     //read file
     LPDWORD lpFileSizeHigh = NULL;
     DWORD dwFileSize = GetFileSize(hFile, lpFileSizeHigh);
-    char* lpBuffer = (char*)malloc(dwFileSize + 1);
+    char* lpBuffer = (char*)malloc(dwFileSize + 1); //we need the extra char to read the null terminator
     if(lpBuffer == NULL){
         printf("[!] ERROR: MALLOC FAILED!");
         return FALSE;
     }
-    DWORD nNumberOfBytesToRead = dwFileSize + 1;
+    DWORD nNumberOfBytesToRead = dwFileSize;
     LPDWORD lpNumberOfBytesRead = NULL;
     LPOVERLAPPED lpOverlapped = NULL;
     if(!ReadFile(hFile, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped)){
         printf("[!] ERROR: FAILED TO READ FILE!");
+        return FALSE;
     }
 
-    printf(lpBuffer);
+    for(int i = 0; i < dwFileSize; i++){
+        printf("%c", lpBuffer[i]);
+    }
 
-    LPCSTR lpApplicationName = NULL;
-    // echo "thisiswhoiam" >> outfile.txt
-    char* cmd = (char *) malloc(strlen("echo ") + strlen(lpBuffer) + strlen(">>") + strlen("outfile.txt"));
-    sprintf(cmd, "echo \"%s\" >> outfile.txt", lpBuffer);
-    printf(cmd);
-    LPSTR lpCommandLine = cmd;
-    LPSECURITY_ATTRIBUTES lpProcessAttributes = NULL;
-    LPSECURITY_ATTRIBUTES lpThreadAttributes = NULL;
-    WINBOOL bInheritHandles = TRUE; 
-    DWORD dwCreationFlags = CREATE_NO_WINDOW;
-    LPVOID lpEnvironment = NULL;
-    LPCSTR lpCurrentDirectory = NULL;
-
-    STARTUPINFOA si;
-    GetStartupInfoA(&si);
-    LPSTARTUPINFOA lpStartupInfo = &si;
-    LPPROCESS_INFORMATION lpProcessInformation = NULL; 
-    BOOL proc = CreateProcessA(
-        lpApplicationName, 
-        lpCommandLine, 
-        lpProcessAttributes, 
-        lpThreadAttributes, 
-        bInheritHandles, 
-        dwCreationFlags, 
-        lpEnvironment, 
-        lpCurrentDirectory, 
-        lpStartupInfo, 
-        lpProcessInformation);
-
-    DWORD dwMilliseconds = INFINITE;
-    WaitForSingleObject(lpProcessInformation->hProcess, dwMilliseconds);
+    CloseHandle(hFile);
+    return TRUE;
 }

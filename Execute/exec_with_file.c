@@ -1,8 +1,5 @@
 #include "printfile.h"
 
-
-
-
 int main(int argc, char* argv[]){
 
     if (argc != 4){
@@ -15,7 +12,8 @@ int main(int argc, char* argv[]){
     char* outfile = argv[3];
 
     // create buffer for cmdline argument
-    // //your solution here!
+    char* cmd = (char*)malloc(strlen(program) + strlen(args) + strlen(outfile));
+    sprintf(cmd, "%s %s %s", program, args, outfile);
 
     STARTUPINFOA si;
     PROCESS_INFORMATION pi;
@@ -26,9 +24,7 @@ int main(int argc, char* argv[]){
     // TODO: Set si.dwFlags...
     // HINT Read this and look for anything that talks about handle inheritance :-)
     //  https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfoa
-    
-    // //your solution here!
-
+    si.dwFlags = STARTF_USESTDHANDLES;
 
     SECURITY_ATTRIBUTES sa;
     sa.nLength = sizeof(sa);
@@ -36,21 +32,58 @@ int main(int argc, char* argv[]){
 
     // TODO: ensure that the child processes can inherit our handles!
     // //your solution here!
+    sa.bInheritHandle = TRUE;
 
     // TODO: Create a file  object and share the handle with a child processes 
     // //your solution here!
+    LPCSTR lpFileName = outfile;
+    DWORD dwDesiredAccess = GENERIC_READ | GENERIC_WRITE;
+    DWORD dwShareMode = FILE_SHARE_WRITE | FILE_SHARE_READ;
+    LPSECURITY_ATTRIBUTES lpSecurityAttributes = NULL; 
+    DWORD dwCreationDisposition = CREATE_NEW;
+    DWORD dwFlagsAndAttributes = FILE_ATTRIBUTE_NORMAL;
+    HANDLE hTemplateFile = NULL;
+    HANDLE hFile = CreateFileA(
+        lpFileName, 
+        dwDesiredAccess,
+        dwShareMode,
+        lpSecurityAttributes,
+        dwCreationDisposition,
+        dwFlagsAndAttributes,
+        hTemplateFile
+    );
 
-    // TODO: Set
-    // set startupinfo handles
-    // //your solution here!
-
-    
+    si.hStdOutput = hFile;
     // Create the child Processes and wait for it to terminate!
     // //your solution here!
+    LPCSTR lpApplicationName = NULL;
+    LPSTR lpCommandLine = cmd;
+    LPSECURITY_ATTRIBUTES lpProcessAttributes = &sa;
+    LPSECURITY_ATTRIBUTES lpThreadAttributes = &sa;
+    BOOL bInheritHandles = TRUE;
+    DWORD dwCreationFlags = 0;
+    LPVOID lpEnvironment = NULL;
+    LPCSTR lpCurrentDirectory = NULL;
+    LPSTARTUPINFOA lpStartupInfo = &si;
+    LPPROCESS_INFORMATION lpProcessInformation = NULL;
+    BOOL CreateProcessA(
+        lpApplicationName, 
+        lpCommandLine, 
+        lpProcessAttributes, 
+        lpThreadAttributes, 
+        bInheritHandles, 
+        dwCreationFlags, 
+        lpEnvironment, 
+        lpCurrentDirectory, 
+        lpStartupInfo, 
+        lpProcessInformation);
 
     // TODO: perform any cleanup necessary! 
     // The parent processes no longer needs a handle to the child processes, the running thread, or the out file!
     // //your solution here!
+    DWORD dwMilliseconds = INFINITE;
+    CloseHandle(lpProcessInformation->hProcess, dwMilliseconds);
+    CloseHandle(hFile, dwMilliseconds);
     // Finally, print the contents of the file!
     PrintFileContents(outfile);
     return 0;
