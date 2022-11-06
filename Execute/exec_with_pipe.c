@@ -1,9 +1,5 @@
 #include <windows.h>
 #include <stdio.h>
-
-
-
-
 #define BUF_SIZE 4096
 
 int main(int argc, char* argv[]){
