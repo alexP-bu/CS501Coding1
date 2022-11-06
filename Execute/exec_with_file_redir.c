@@ -12,7 +12,7 @@ int main(int argc, char* argv[]){
 
     // TODO: Make cmd line from program, args, and outfile
     char* cmd = (char *) malloc(
-        strlen("C:\\Windows\\system32\\cmd.exe /c ") +
+        strlen("cmd.exe /c ") +
         strlen(program) + 
         strlen(args) + strlen(">") + 
         strlen(outfile) + 
