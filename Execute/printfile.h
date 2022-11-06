@@ -42,9 +42,12 @@ BOOL PrintFileContents(char* filename){
         return FALSE;
     }
 
-    lpBuffer[dwFileSize] = '\0';
+    lpBuffer[dwFileSize] = '\0'; // this is why added the +1 earlier!
     printf(lpBuffer);
+    
+    //clean up
     free(lpBuffer);
     CloseHandle(hFile);
+    
     return TRUE;
 }
