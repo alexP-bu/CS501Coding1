@@ -18,7 +18,7 @@ int main(int argc, char* argv[]){
         strlen(outfile) + 
         4 //4 spaces
         );
-    sprintf(cmd, "C:\\Windows\\system32\\cmd.exe /c %s %s >> %s", program, args, outfile);
+    sprintf(cmd, "C:\\Windows\\system32\\cmd.exe /c %s %s > %s", program, args, outfile);
     printf(cmd);
     // Values needed for CreateProcessA
     STARTUPINFOA si;
@@ -35,10 +35,9 @@ int main(int argc, char* argv[]){
     LPSECURITY_ATTRIBUTES lpProcessAttributes = NULL;
     LPSECURITY_ATTRIBUTES lpThreadAttributes = NULL;
     BOOL bInheritHandles = TRUE; 
-    DWORD dwCreationFlags = CREATE_NO_WINDOW;
+    DWORD dwCreationFlags = 0;
     LPVOID lpEnvironment = NULL;
     LPCSTR lpCurrentDirectory = NULL;
-    GetStartupInfoA(&si);
     LPSTARTUPINFOA lpStartupInfo = &si;
     LPPROCESS_INFORMATION lpProcessInformation = &pi;
     BOOL proc = CreateProcessA(
@@ -57,6 +56,8 @@ int main(int argc, char* argv[]){
     WaitForSingleObject(lpProcessInformation->hProcess, dwMilliseconds);
 
     // TODO: Cleanup
+    free(cmd);
     CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
     return 0;
 }

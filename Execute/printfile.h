@@ -42,10 +42,9 @@ BOOL PrintFileContents(char* filename){
         return FALSE;
     }
 
-    for(int i = 0; i < dwFileSize; i++){
-        printf("%c", lpBuffer[i]);
-    }
-
+    lpBuffer[dwFileSize] = '\0';
+    printf(lpBuffer);
+    free(lpBuffer);
     CloseHandle(hFile);
     return TRUE;
 }
