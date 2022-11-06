@@ -78,12 +78,13 @@ int main(int argc, char* argv[]){
         lpStartupInfo, 
         lpProcessInformation);
 
+    DWORD dwMilliseconds = INFINITE;
+    WaitForSingleObject(lpProcessInformation->hProcess, dwMilliseconds);
     // TODO: perform any cleanup necessary! 
     // The parent processes no longer needs a handle to the child processes, the running thread, or the out file!
     // //your solution here!
-    DWORD dwMilliseconds = INFINITE;
-    CloseHandle(lpProcessInformation->hProcess, dwMilliseconds);
-    CloseHandle(hFile, dwMilliseconds);
+    CloseHandle(lpProcessInformation->hProcess);
+    CloseHandle(hFile);
     // Finally, print the contents of the file!
     PrintFileContents(outfile);
     return 0;

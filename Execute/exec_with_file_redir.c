@@ -11,8 +11,14 @@ int main(int argc, char* argv[]){
     char* outfile = argv[3];
 
     // TODO: Make cmd line from program, args, and outfile
-    char* cmd = (char *) malloc(strlen(program) + strlen(args) + strlen(">>") + strlen(outfile));
-    sprintf(cmd, "%s %s >> %s", program, args, outfile);
+    char* cmd = (char *) malloc(
+        strlen("C:\\Windows\\system32\\cmd.exe /c ") +
+        strlen(program) + 
+        strlen(args) + strlen(">") + 
+        strlen(outfile) + 
+        4 //4 spaces
+        );
+    sprintf(cmd, "C:\\Windows\\system32\\cmd.exe /c %s %s >> %s", program, args, outfile);
     printf(cmd);
     // Values needed for CreateProcessA
     STARTUPINFOA si;
@@ -32,7 +38,6 @@ int main(int argc, char* argv[]){
     DWORD dwCreationFlags = CREATE_NO_WINDOW;
     LPVOID lpEnvironment = NULL;
     LPCSTR lpCurrentDirectory = NULL;
-    STARTUPINFOA si;
     GetStartupInfoA(&si);
     LPSTARTUPINFOA lpStartupInfo = &si;
     LPPROCESS_INFORMATION lpProcessInformation = &pi;
@@ -53,7 +58,5 @@ int main(int argc, char* argv[]){
 
     // TODO: Cleanup
     CloseHandle(pi.hProcess);
-    
-    PrintFileContents(outfile);
     return 0;
 }
