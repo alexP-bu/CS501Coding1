@@ -11,9 +11,19 @@ int main(int argc, char* argv[]){
     char* args = argv[2];
     char* outfile = argv[3];
 
-    // create buffer for cmdline argument
-    char* cmd = (char*)malloc(strlen(program) + strlen(args) + strlen(outfile));
-    sprintf(cmd, "%s %s %s", program, args, outfile);
+    // create buffer for cmdline argument same as exec with file except without redir and outfile (will be made later)
+    char* cmd = (char *)malloc(
+        strlen("cmd.exe /c") +
+        strlen(program) + 
+        strlen(args) + 
+        1 //1 space between %s
+        );
+
+    sprintf(cmd, "cmd.exe /c %s %s", program, args);
+
+    if(cmd == NULL){
+        printf("[!] ERROR: MALLOC FAILED!");
+    }
 
     STARTUPINFOA si;
     PROCESS_INFORMATION pi;
@@ -21,7 +31,7 @@ int main(int argc, char* argv[]){
     ZeroMemory(&pi, sizeof(pi));
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
-    // TODO: Set si.dwFlags...
+    // Set si.dwFlags...
     // HINT Read this and look for anything that talks about handle inheritance :-)
     //  https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfoa
     si.dwFlags = STARTF_USESTDHANDLES;
@@ -30,62 +40,46 @@ int main(int argc, char* argv[]){
     sa.nLength = sizeof(sa);
     sa.lpSecurityDescriptor = NULL;
 
-    // TODO: ensure that the child processes can inherit our handles!
-    // //your solution here!
+    //ensure that the child processes can inherit our handles!
     sa.bInheritHandle = TRUE;
 
-    // TODO: Create a file  object and share the handle with a child processes 
+    //Create a file  object and share the handle with a child processes 
     // //your solution here!
-    LPCSTR lpFileName = outfile;
-    DWORD dwDesiredAccess = GENERIC_READ | GENERIC_WRITE;
-    DWORD dwShareMode = FILE_SHARE_WRITE | FILE_SHARE_READ;
-    LPSECURITY_ATTRIBUTES lpSecurityAttributes = NULL; 
-    DWORD dwCreationDisposition = CREATE_NEW;
-    DWORD dwFlagsAndAttributes = FILE_ATTRIBUTE_NORMAL;
-    HANDLE hTemplateFile = NULL;
-    HANDLE hFile = CreateFileA(
-        lpFileName, 
-        dwDesiredAccess,
-        dwShareMode,
-        lpSecurityAttributes,
-        dwCreationDisposition,
-        dwFlagsAndAttributes,
-        hTemplateFile
-    );
+    HANDLE hFile = CreateFileA(outfile, 
+                               GENERIC_WRITE, 
+                               0, 
+                               &sa, 
+                               CREATE_ALWAYS, 
+                               FILE_ATTRIBUTE_NORMAL, 
+                               NULL);
+    if(!hFile){
+        printf("[!] ERROR: INVALID FILE HANDLE!");
+    }
 
+    // set startupinfo handles
+    // //your solution here!
     si.hStdOutput = hFile;
+    
     // Create the child Processes and wait for it to terminate!
     // //your solution here!
-    LPCSTR lpApplicationName = NULL;
-    LPSTR lpCommandLine = cmd;
-    LPSECURITY_ATTRIBUTES lpProcessAttributes = &sa;
-    LPSECURITY_ATTRIBUTES lpThreadAttributes = &sa;
-    BOOL bInheritHandles = TRUE;
-    DWORD dwCreationFlags = 0;
-    LPVOID lpEnvironment = NULL;
-    LPCSTR lpCurrentDirectory = NULL;
-    LPSTARTUPINFOA lpStartupInfo = &si;
-    LPPROCESS_INFORMATION lpProcessInformation = NULL;
-    BOOL CreateProcessA(
-        lpApplicationName, 
-        lpCommandLine, 
-        lpProcessAttributes, 
-        lpThreadAttributes, 
-        bInheritHandles, 
-        dwCreationFlags, 
-        lpEnvironment, 
-        lpCurrentDirectory, 
-        lpStartupInfo, 
-        lpProcessInformation);
+    if(!CreateProcessA(NULL, cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)){
+        printf("[!] ERROR: FAILED TO CREATE PROCESS!");
+    }
 
-    DWORD dwMilliseconds = INFINITE;
-    WaitForSingleObject(lpProcessInformation->hProcess, dwMilliseconds);
-    // TODO: perform any cleanup necessary! 
+    DWORD dwMS = INFINITE;
+    WaitForSingleObject(pi.hThread, dwMS);
+    WaitForSingleObject(pi.hProcess, dwMS);
+
+    // perform any cleanup necessary! 
     // The parent processes no longer needs a handle to the child processes, the running thread, or the out file!
-    // //your solution here!
-    CloseHandle(lpProcessInformation->hProcess);
+    free(cmd);
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
     CloseHandle(hFile);
     // Finally, print the contents of the file!
-    PrintFileContents(outfile);
+    if(!PrintFileContents(outfile)){
+        printf("[!] ERROR PRINTING FILE CONTENTS");
+    }
+
     return 0;
 }

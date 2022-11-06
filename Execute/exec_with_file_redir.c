@@ -10,15 +10,21 @@ int main(int argc, char* argv[]){
     char* args = argv[2];
     char* outfile = argv[3];
 
-    // TODO: Make cmd line from program, args, and outfile
-    char* cmd = (char *) malloc(
-        strlen("cmd.exe /c ") +
+    //Make cmd line from program, args, and outfile
+    char* cmd = (char *)malloc(
+        strlen("cmd.exe /c") +
         strlen(program) + 
-        strlen(args) + strlen(">") + 
+        strlen(args) + 
+        strlen(">") + 
         strlen(outfile) + 
         4 //4 spaces
         );
     sprintf(cmd, "cmd.exe /c %s %s > %s", program, args, outfile);
+
+    if(cmd == NULL){
+        printf("[!] MALLOC FAILED!");
+    }
+
     // Values needed for CreateProcessA
     STARTUPINFOA si;
     PROCESS_INFORMATION pi;
@@ -33,13 +39,13 @@ int main(int argc, char* argv[]){
     LPSTR lpCommandLine = cmd;
     LPSECURITY_ATTRIBUTES lpProcessAttributes = NULL;
     LPSECURITY_ATTRIBUTES lpThreadAttributes = NULL;
-    BOOL bInheritHandles = TRUE; 
+    BOOL bInheritHandles = FALSE; 
     DWORD dwCreationFlags = 0;
     LPVOID lpEnvironment = NULL;
     LPCSTR lpCurrentDirectory = NULL;
     LPSTARTUPINFOA lpStartupInfo = &si;
     LPPROCESS_INFORMATION lpProcessInformation = &pi;
-    BOOL proc = CreateProcessA(
+    if(!CreateProcessA(
         lpApplicationName, 
         lpCommandLine, 
         lpProcessAttributes, 
@@ -49,14 +55,21 @@ int main(int argc, char* argv[]){
         lpEnvironment, 
         lpCurrentDirectory, 
         lpStartupInfo, 
-        lpProcessInformation);
-    // TODO: Wait for processes to exit 
-    DWORD dwMilliseconds = INFINITE;
-    WaitForSingleObject(lpProcessInformation->hProcess, dwMilliseconds);
+        lpProcessInformation)){
+            printf("[!] FAILED TO CREATE PROCESS!");
+        };
 
-    // TODO: Cleanup
+    //Wait for processes to exit 
+    DWORD dwMilliseconds = INFINITE;
+    WaitForSingleObject(pi.hProcess, dwMilliseconds);
+
+    if(!PrintFileContents(outfile)){
+        printf("[!] FAILED TO PRINT FILE CONTENTS!");
+    }
+
+    //Cleanup
     free(cmd);
-    CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
     return 0;
 }
