@@ -18,7 +18,7 @@ int main(int argc, char* argv[]){
         strlen(outfile) + 
         4 //4 spaces
         );
-    sprintf(cmd, "C:\\Windows\\system32\\cmd.exe /c %s %s > %s", program, args, outfile);
+    sprintf(cmd, "cmd.exe /c %s %s > %s", program, args, outfile);
     printf(cmd);
     // Values needed for CreateProcessA
     STARTUPINFOA si;
