@@ -33,7 +33,7 @@ int main(int argc, char* argv[]){
     // Set si.dwFlags...
     // HINT Read this and look for anything that talks about handle inheritance :-)
     //  https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfoa
-    si.dwFlags = STARTF_USESTDHANDLES;
+    //si.dwFlags = STARTF_USESTDHANDLES;
 
     SECURITY_ATTRIBUTES sa;
     sa.nLength = sizeof(sa);
@@ -44,7 +44,7 @@ int main(int argc, char* argv[]){
 
     // Create a pipe object and share the handle with a child processes 
     printf("TEST1");
-    if(!CreatePipe(hStdOutRead, hStdOutWrite, &sa, 0)){
+    if(!CreatePipe(hStdOutRead, hStdOutWrite, &sa, BUF_SIZE)){
         printf("[!] FAILED TO CREATE PIPE!");
         return 0;
     }
