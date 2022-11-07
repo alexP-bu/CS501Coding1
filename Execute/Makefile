@@ -33,7 +33,7 @@ test_exec_with_file:exec_with_file
 	bin/exec_with_file.exe "ping.exe" "127.0.0.1" "test.txt"
 
 exec_with_pipe:
-	$(CC) exec_with_pipe -o bin/exec_with_pipe.exe
+	$(CC) exec_with_pipe.c -o bin/exec_with_pipe.exe
 
 test_exec_with_pipe:exec_with_pipe
 	bin/exec_with_pipe.exe "whoami /priv" " "
