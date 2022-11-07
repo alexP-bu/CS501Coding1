@@ -33,7 +33,7 @@ int main(int argc, char* argv[]){
     // Set si.dwFlags...
     // HINT Read this and look for anything that talks about handle inheritance :-)
     //  https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfoa
-    //si.dwFlags = STARTF_USESTDHANDLES;
+    si.dwFlags = STARTF_USESTDHANDLES;
 
     SECURITY_ATTRIBUTES sa;
     sa.nLength = sizeof(sa);
@@ -43,12 +43,15 @@ int main(int argc, char* argv[]){
     sa.bInheritHandle = TRUE;
 
     // Create a pipe object and share the handle with a child processes 
-    printf("TEST1");
-    if(!CreatePipe(hStdOutRead, hStdOutWrite, &sa, BUF_SIZE)){
+    if(!CreatePipe(&hStdOutRead, &hStdOutWrite, &sa, 0)){
         printf("[!] FAILED TO CREATE PIPE!");
         return 0;
     }
-    printf("TEST2");
+    //set handle info
+    if (!SetHandleInformation(hStdOutRead, HANDLE_FLAG_INHERIT, 0)){
+      printf("ERROR: Could not set handle info");
+    }
+
     // set startupinfo handles
     si.hStdInput = NULL;
     si.hStdError = hStdOutWrite;
@@ -58,24 +61,30 @@ int main(int argc, char* argv[]){
     if(!CreateProcessA(NULL, cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)){
         printf("[!] FAILED TO START PROCESS!");
         return 0;
+    }else{
+        WaitForSingleObject(pi.hProcess, INFINITE);
+        CloseHandle(pi.hThread);
+        CloseHandle(pi.hProcess);
     }
-    char* lpBuffer = (char*)malloc(BUF_SIZE);
-    if(lpBuffer = NULL){
+
+    char* lpBuffer = (char*)malloc(BUF_SIZE + 1);
+    DWORD dwRead = 0;
+    if((lpBuffer = NULL)){
         printf("[!] ERROR: MALLOC FAILED!");
     }
     // Finally, print the contents from the pipe!
-    while(WaitForSingleObject(pi.hProcess, INFINITE)){
-        while(PeekNamedPipe(hStdOutRead, lpBuffer, BUF_SIZE - 1, NULL, NULL, NULL)){
-            if(ReadFile(hStdOutRead, lpBuffer, BUF_SIZE - 1, NULL, NULL)){
-                lpBuffer[BUF_SIZE] = '\0';
-                printf("%s", lpBuffer);
-            }
+    while(PeekNamedPipe(hStdOutRead, lpBuffer, BUF_SIZE - 1, &dwRead, NULL, NULL)){
+        if(ReadFile(hStdOutRead, lpBuffer, dwRead, NULL, NULL)){
+            lpBuffer[dwRead] = '\0';
+            printf("%s", lpBuffer);
+        }else{
+            printf("[!] ERROR: ERROR WITH READFILE: %d", GetLastError());
+            break;
         }
     }
     //perform any cleanup necessary!
     free(cmd);
-    CloseHandle(pi.hThread);
-    CloseHandle(pi.hProcess);
+    free(lpBuffer);
     CloseHandle(hStdOutRead);
     CloseHandle(hStdOutWrite); 
     
