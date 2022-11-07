@@ -39,28 +39,45 @@ int main(int argc, char* argv[]){
     sa.nLength = sizeof(sa);
     sa.lpSecurityDescriptor = NULL;
 
-    // nsure that the child processes can inherit our handles!
+    // ensure that the child processes can inherit our handles!
     sa.bInheritHandle = TRUE;
-    // Create a pipe  object and share the handle with a child processes 
-    DWORD nSize = BUF_SIZE;
-    if(!CreatePipe(hStdOutRead, hStdOutWrite, &sa, nSize)){
-        printf("[!] FAILED TO CREATE PIPE!");
-    }
 
+    // Create a pipe object and share the handle with a child processes 
+    printf("TEST1");
+    if(!CreatePipe(hStdOutRead, hStdOutWrite, &sa, 0)){
+        printf("[!] FAILED TO CREATE PIPE!");
+        return 0;
+    }
+    printf("TEST2");
     // set startupinfo handles
     si.hStdInput = NULL;
     si.hStdError = hStdOutWrite;
     si.hStdOutput = hStdOutWrite;
     
-    // Create the child Processes and wait for it to terminate!
+    //Create the child Processes and wait for it to terminate!
     if(!CreateProcessA(NULL, cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)){
         printf("[!] FAILED TO START PROCESS!");
+        return 0;
     }
-
-    // TODO: perform any cleanup necessary! 
-    // The parent processes no longer needs a handle to the child processes, the running thread, or the out file!
-    // //your solution here!
+    char* lpBuffer = (char*)malloc(BUF_SIZE);
+    if(lpBuffer = NULL){
+        printf("[!] ERROR: MALLOC FAILED!");
+    }
     // Finally, print the contents from the pipe!
-    //
+    while(WaitForSingleObject(pi.hProcess, INFINITE)){
+        while(PeekNamedPipe(hStdOutRead, lpBuffer, BUF_SIZE - 1, NULL, NULL, NULL)){
+            if(ReadFile(hStdOutRead, lpBuffer, BUF_SIZE - 1, NULL, NULL)){
+                lpBuffer[BUF_SIZE] = '\0';
+                printf("%s", lpBuffer);
+            }
+        }
+    }
+    //perform any cleanup necessary!
+    free(cmd);
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
+    CloseHandle(hStdOutRead);
+    CloseHandle(hStdOutWrite); 
+    
     return 0;
 }

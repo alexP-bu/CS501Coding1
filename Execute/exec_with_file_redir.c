@@ -23,6 +23,7 @@ int main(int argc, char* argv[]){
 
     if(cmd == NULL){
         printf("[!] MALLOC FAILED!");
+        return 0;
     }
 
     // Values needed for CreateProcessA
@@ -57,6 +58,7 @@ int main(int argc, char* argv[]){
         lpStartupInfo, 
         lpProcessInformation)){
             printf("[!] FAILED TO CREATE PROCESS!");
+            return 0;
         };
 
     //Wait for processes to exit 
@@ -65,6 +67,7 @@ int main(int argc, char* argv[]){
 
     if(!PrintFileContents(outfile)){
         printf("[!] FAILED TO PRINT FILE CONTENTS!");
+        return 0;
     }
 
     //Cleanup
